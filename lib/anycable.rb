@@ -18,6 +18,8 @@ require "anycable/health_server"
 
 require "anycable/httrpc/server"
 
+require "nsq"
+
 # AnyCable allows to use any websocket service (written in any language) as a replacement
 # for ActionCable server.
 #
@@ -50,6 +52,35 @@ module AnyCable
 
     def config
       @config ||= Config.new
+    end
+
+    def to_client
+      return @to_client if @to_client
+
+      cfg = {topic: config.to_client_topic}
+      if config.to_client_lookupd && config.to_client_lookupd != "nil"
+        cfg[:nsqlookupd] = config.to_client_lookupd
+      else
+        cfg[:nsqd] = config.to_client_nsqd
+      end
+      @to_client ||= ::Nsq::Producer.new(cfg)
+    end
+
+    def from_client
+      return @from_client if @from_client
+
+      cfg = {
+        topic: config.from_client_topic,
+        channel: config.from_client_channel,
+        msg_timeout: config.from_client_msg_timeout,
+        max_in_flight: config.from_client_max_in_flight
+      }
+      if config.from_client_lookupd && config.from_client_lookupd != "nil"
+        cfg[:nsqlookupd] = config.from_client_lookupd
+      else
+        cfg[:nsqd] = config.from_client_nsqd
+      end
+      @from_client ||= ::Nsq::Consumer.new(cfg)
     end
 
     def configure
@@ -112,7 +143,8 @@ module AnyCable
 end
 
 # Try loading a gRPC implementation
-impl = ENV.fetch("ANYCABLE_GRPC_IMPL", "grpc")
+# impl = ENV.fetch("ANYCABLE_GRPC_IMPL", "grpc")
+impl = "nsq"
 
 case impl
 when "grpc"
@@ -129,5 +161,11 @@ when "grpc_kit"
     require "grpc_kit/version"
     require "anycable/grpc_kit"
   rescue LoadError
+  end
+when "nsq"
+  begin
+    require "anycable/nsq"
+  rescue LoadError => e
+    raise if /Error loading shared library/.match?(e.message)
   end
 end

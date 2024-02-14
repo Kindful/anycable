@@ -23,6 +23,18 @@ module AnyCable
     attr_config(
       presets: "",
 
+      # NSQ
+      to_client_topic: "ws_fromrails",
+      to_client_nsqd: "localhost:4150",
+      to_client_lookupd: nil,
+
+      from_client_topic: "ws_fromclient",
+      from_client_channel: "rails",
+      from_client_nsqd: "localhost:4150",
+      from_client_lookupd: nil,
+      from_client_msg_timeout: 5000,
+      from_client_max_in_flight: 5,
+
       ## PubSub
       broadcast_adapter: :redis,
 
