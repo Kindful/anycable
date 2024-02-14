@@ -9,7 +9,7 @@ module AnyCable
       class << self
         @running = true
         def start
-          log_grpc! if AnyCable.config.log_grpc
+          # log_grpc! if AnyCable.config.log_grpc
 
           rpc = AnyCable::NSQ::Handler.new
           loop do
