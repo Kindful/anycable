@@ -30,6 +30,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "anyway_config", "~> 2.2"
   spec.add_dependency "google-protobuf", ">= 3.13"
+  spec.add_dependency "nsq-ruby", "~> 2.4"
 
   spec.add_development_dependency "redis", ">= 4.0"
   spec.add_development_dependency "nats-pure", "~> 2"
