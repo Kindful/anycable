@@ -70,7 +70,6 @@ module AnyCable
         )
         message["command"] = "message" if message["command"] == "perform"
         begin
-          #binding.pry
           connection.connect
 
         rescue ActionCable::Connection::Authorization::UnauthorizedError => e
